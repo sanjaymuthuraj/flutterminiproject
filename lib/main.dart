@@ -64,18 +64,18 @@ class _GameScreenState extends State<GameScreen> {
     const Rect.fromLTWH(3200, 350, 800, 300),
 
     // Elevated platforms
-    const Rect.fromLTWH(300, 250, 150, 20),
-    const Rect.fromLTWH(500, 170, 120, 20), // Lowered and widened
+    const Rect.fromLTWH(300, 280, 150, 20),
+    const Rect.fromLTWH(500, 210, 120, 20), // Lowered and widened
 
     // Stairs / obstacles
     const Rect.fromLTWH(900, 300, 50, 300),
-    const Rect.fromLTWH(950, 250, 50, 300),
-    const Rect.fromLTWH(1000, 200, 50, 300),
+    const Rect.fromLTWH(950, 260, 50, 300),
+    const Rect.fromLTWH(1000, 220, 50, 300),
 
     // Large gap and small floating platforms
-    const Rect.fromLTWH(1350, 250, 100, 20),
-    const Rect.fromLTWH(1500, 180, 120, 20), // Lowered and brought closer
-    const Rect.fromLTWH(1700, 200, 150, 20), // Brought closer
+    const Rect.fromLTWH(1350, 280, 100, 20),
+    const Rect.fromLTWH(1500, 220, 120, 20), // Lowered and brought closer
+    const Rect.fromLTWH(1700, 240, 150, 20), // Brought closer
 
     // Final high stair climb
     const Rect.fromLTWH(2400, 310, 50, 300),
