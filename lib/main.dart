@@ -52,6 +52,7 @@ class _GameScreenState extends State<GameScreen> {
   // Game won/lost
   bool gameWon = false;
   bool isDead = false;
+  bool isWinning = false;
 
   // Level definition
   final List<Rect> platforms = [
@@ -78,7 +79,7 @@ class _GameScreenState extends State<GameScreen> {
     const Rect.fromLTWH(1500, 200, 150, 20),
   ];
 
-  final Rect goal = const Rect.fromLTWH(1750, 270, 40, 80); // End flag
+  final Rect goal = const Rect.fromLTWH(1750, 100, 20, 250); // End flag pole
   
   final List<Rect> lava = [
     const Rect.fromLTWH(400, 380, 50, 20),
@@ -104,6 +105,9 @@ class _GameScreenState extends State<GameScreen> {
       playerVy = 0;
       gameWon = false;
       isDead = false;
+      isWinning = false;
+      leftPressed = false;
+      rightPressed = false;
     });
     
     gameLoop?.cancel();
@@ -116,6 +120,22 @@ class _GameScreenState extends State<GameScreen> {
     if (gameWon || isDead || !mounted) return;
 
     setState(() {
+      if (isWinning) {
+        playerVx = 0;
+        if (playerY < 350 - playerHeight) {
+          playerY += 4; // Slide down pole
+        } else {
+          playerY = 350 - playerHeight;
+          playerX += 2; // Walk into castle
+        }
+        
+        if (playerX >= 1835) { // Mario enters castle door
+          win();
+          isWinning = false;
+        }
+        return;
+      }
+
       // Horizontal movement
       if (leftPressed && !rightPressed) {
         playerVx = -moveSpeed;
@@ -141,9 +161,11 @@ class _GameScreenState extends State<GameScreen> {
         }
       }
 
-      // Block player from going too far left
+      // Block player from going too far left or right
       if (playerX < 0) {
         playerX = 0;
+      } else if (playerX > 1900) {
+        playerX = 1900;
       }
 
       // Vertical movement & gravity
@@ -181,12 +203,13 @@ class _GameScreenState extends State<GameScreen> {
       
       // Win condition (hitting the goal)
       if (playerFinalRect.overlaps(goal)) {
-        win();
+        isWinning = true;
       }
     });
   }
   
   void jump() {
+    if (isWinning || gameWon || isDead) return;
     // Ground detection: check if there's a platform 1 pixel below the player
     bool onGround = false;
     Rect jumpCheck = Rect.fromLTWH(playerX, playerY + 1, playerWidth, playerHeight);
@@ -296,9 +319,43 @@ class _GameScreenState extends State<GameScreen> {
                       top: goal.top,
                       width: goal.width,
                       height: goal.height,
-                      child: Container(
-                        color: Colors.yellowAccent[100],
-                        child: const Icon(Icons.flag, size: 40, color: Colors.green),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(color: Colors.grey[300]), // Pole
+                          Positioned(
+                            left: 0,
+                            top: 0,
+                            child: Container(width: 40, height: 30, color: Colors.green), // Flag
+                          )
+                        ],
+                      ),
+                    ),
+                    
+                    // Render Castle
+                    Positioned(
+                      left: 1820,
+                      top: 150,
+                      width: 90,
+                      height: 200,
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(color: Colors.orange[300], border: Border.all(color: Colors.black, width: 2)),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 30,
+                            width: 30,
+                            height: 50,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
 
