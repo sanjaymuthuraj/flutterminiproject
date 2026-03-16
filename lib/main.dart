@@ -56,35 +56,45 @@ class _GameScreenState extends State<GameScreen> {
 
   // Level definition
   final List<Rect> platforms = [
-    // Ground level segments
-    const Rect.fromLTWH(0, 350, 400, 50),
-    const Rect.fromLTWH(450, 350, 300, 50),
-    const Rect.fromLTWH(800, 350, 400, 50),
-    const Rect.fromLTWH(1300, 350, 600, 50),
+    // Ground level segments (extended height so it acts as solid ground)
+    const Rect.fromLTWH(0, 350, 600, 300),
+    const Rect.fromLTWH(700, 350, 400, 300),
+    const Rect.fromLTWH(1200, 350, 800, 300),
+    const Rect.fromLTWH(2100, 350, 1000, 300),
+    const Rect.fromLTWH(3200, 350, 800, 300),
     
     // Elevated platforms
-    const Rect.fromLTWH(200, 250, 100, 20),
-    const Rect.fromLTWH(350, 150, 100, 20),
+    const Rect.fromLTWH(300, 250, 150, 20),
+    const Rect.fromLTWH(500, 150, 100, 20),
     
     // Stairs / obstacles
-    const Rect.fromLTWH(600, 300, 50, 50),
-    const Rect.fromLTWH(650, 250, 50, 100),
-    const Rect.fromLTWH(700, 200, 50, 150),
+    const Rect.fromLTWH(900, 300, 50, 300),
+    const Rect.fromLTWH(950, 250, 50, 300),
+    const Rect.fromLTWH(1000, 200, 50, 300),
     
-    // More platforms before the end
-    const Rect.fromLTWH(1000, 250, 100, 20),
-    const Rect.fromLTWH(1150, 150, 100, 20),
+    // Large gap and small floating platforms
+    const Rect.fromLTWH(1400, 250, 100, 20),
+    const Rect.fromLTWH(1600, 150, 100, 20),
+    const Rect.fromLTWH(1800, 200, 150, 20),
     
-    // Final high platform
-    const Rect.fromLTWH(1500, 200, 150, 20),
+    // Final high stair climb
+    const Rect.fromLTWH(2400, 300, 50, 300),
+    const Rect.fromLTWH(2450, 250, 50, 300),
+    const Rect.fromLTWH(2500, 200, 50, 300),
+    const Rect.fromLTWH(2550, 150, 50, 300),
+    const Rect.fromLTWH(2600, 100, 50, 300),
+    
+    // Final high platform before pole
+    const Rect.fromLTWH(2800, 100, 150, 20),
   ];
 
-  final Rect goal = const Rect.fromLTWH(1750, 100, 20, 250); // End flag pole
+  final Rect goal = const Rect.fromLTWH(3600, 100, 20, 250); // End flag pole
   
   final List<Rect> lava = [
-    const Rect.fromLTWH(400, 380, 50, 20),
-    const Rect.fromLTWH(750, 380, 50, 20),
-    const Rect.fromLTWH(1200, 380, 100, 20),
+    const Rect.fromLTWH(600, 380, 100, 20),
+    const Rect.fromLTWH(1100, 380, 100, 20),
+    const Rect.fromLTWH(2000, 380, 100, 20),
+    const Rect.fromLTWH(3100, 380, 100, 20),
   ];
 
   // Input state
@@ -129,7 +139,7 @@ class _GameScreenState extends State<GameScreen> {
           playerX += 2; // Walk into castle
         }
         
-        if (playerX >= 1835) { // Mario enters castle door
+        if (playerX >= goal.left + 85) { // Mario enters castle door
           win();
           isWinning = false;
         }
@@ -164,8 +174,8 @@ class _GameScreenState extends State<GameScreen> {
       // Block player from going too far left or right
       if (playerX < 0) {
         playerX = 0;
-      } else if (playerX > 1900) {
-        playerX = 1900;
+      } else if (playerX > goal.left + 150) {
+        playerX = goal.left + 150;
       }
 
       // Vertical movement & gravity
@@ -280,7 +290,10 @@ class _GameScreenState extends State<GameScreen> {
                 child: Stack(
                   children: [
                     // Render Platforms
-                    ...platforms.map((platform) => Positioned(
+                    ...platforms.where((platform) {
+                       // Only render if platform is within or near the visible viewport
+                       return platform.right >= cameraX - 100 && platform.left <= cameraX + screenWidth + 100;
+                    }).map((platform) => Positioned(
                       left: platform.left,
                       top: platform.top,
                       width: platform.width,
@@ -292,14 +305,15 @@ class _GameScreenState extends State<GameScreen> {
                             top: BorderSide(color: Colors.green[500]!, width: 6),
                             left: BorderSide(color: Colors.brown[800]!, width: 2),
                             right: BorderSide(color: Colors.brown[800]!, width: 2),
-                            bottom: BorderSide(color: Colors.brown[800]!, width: 2),
                           ),
                         ),
                       ),
                     )),
                     
                     // Render Lava
-                    ...lava.map((l) => Positioned(
+                    ...lava.where((l) {
+                       return l.right >= cameraX - 100 && l.left <= cameraX + screenWidth + 100;
+                    }).map((l) => Positioned(
                       left: l.left,
                       top: l.top,
                       width: l.width,
@@ -313,32 +327,34 @@ class _GameScreenState extends State<GameScreen> {
                       ),
                     )),
 
-                    // Render Goal
-                    Positioned(
-                      left: goal.left,
-                      top: goal.top,
-                      width: goal.width,
-                      height: goal.height,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(color: Colors.grey[300]), // Pole
-                          Positioned(
-                            left: 0,
-                            top: 0,
-                            child: Container(width: 40, height: 30, color: Colors.green), // Flag
-                          )
-                        ],
+                    // Render Goal (only if visible)
+                    if (goal.right >= cameraX - 100 && goal.left <= cameraX + screenWidth + 100)
+                      Positioned(
+                        left: goal.left,
+                        top: goal.top,
+                        width: goal.width,
+                        height: goal.height,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(color: Colors.grey[300]), // Pole
+                            Positioned(
+                              left: 0,
+                              top: 0,
+                              child: Container(width: 40, height: 30, color: Colors.green), // Flag
+                            )
+                          ],
+                        ),
                       ),
-                    ),
                     
-                    // Render Castle
-                    Positioned(
-                      left: 1820,
-                      top: 150,
-                      width: 90,
-                      height: 200,
-                      child: Stack(
+                    // Render Castle (only if visible)
+                    if (goal.right >= cameraX - 100)
+                      Positioned(
+                        left: goal.left + 70,
+                        top: 150,
+                        width: 90,
+                        height: 200,
+                        child: Stack(
                         children: [
                           Container(
                             decoration: BoxDecoration(color: Colors.orange[300], border: Border.all(color: Colors.black, width: 2)),
