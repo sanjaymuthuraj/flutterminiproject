@@ -19,8 +19,105 @@ class MarioGameApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Mini Mario',
-      home: const GameScreen(),
+      title: 'ESCAPE KCET',
+      home: const HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.blue[900],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'ESCAPE KCET',
+              style: TextStyle(
+                fontSize: 64,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 4,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    color: Colors.black,
+                    offset: Offset(4, 4),
+                    blurRadius: 4,
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(height: 50),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                backgroundColor: Colors.red[600],
+                foregroundColor: Colors.white,
+                elevation: 5,
+                textStyle: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoadingScreen()),
+                );
+              },
+              child: const Text('START ESCAPE'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LoadingScreen extends StatefulWidget {
+  const LoadingScreen({super.key});
+
+  @override
+  State<LoadingScreen> createState() => _LoadingScreenState();
+}
+
+class _LoadingScreenState extends State<LoadingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const GameScreen()),
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            CircularProgressIndicator(color: Colors.white),
+            SizedBox(height: 24),
+            Text(
+              'Entering Simulation...',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                letterSpacing: 2,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -97,6 +194,26 @@ class _GameScreenState extends State<GameScreen> {
     const Rect.fromLTWH(3100, 380, 100, 20),
   ];
 
+  // Coins state
+  List<Rect> initialCoins = [
+    const Rect.fromLTWH(150, 310, 20, 20),
+    const Rect.fromLTWH(250, 280, 20, 20),
+    const Rect.fromLTWH(350, 230, 20, 20),
+    const Rect.fromLTWH(550, 160, 20, 20),
+    const Rect.fromLTWH(800, 310, 20, 20),
+    const Rect.fromLTWH(1050, 260, 20, 20),
+    const Rect.fromLTWH(1250, 310, 20, 20),
+    const Rect.fromLTWH(1400, 230, 20, 20),
+    const Rect.fromLTWH(1550, 170, 20, 20),
+    const Rect.fromLTWH(1750, 190, 20, 20),
+    const Rect.fromLTWH(2200, 310, 20, 20),
+    const Rect.fromLTWH(2650, 100, 20, 20),
+    const Rect.fromLTWH(3000, 310, 20, 20),
+    const Rect.fromLTWH(3350, 310, 20, 20),
+  ];
+  List<Rect> coins = [];
+  int score = 0;
+
   // Input state
   bool leftPressed = false;
   bool rightPressed = false;
@@ -118,6 +235,8 @@ class _GameScreenState extends State<GameScreen> {
       isWinning = false;
       leftPressed = false;
       rightPressed = false;
+      score = 0;
+      coins = List.from(initialCoins);
     });
 
     gameLoop?.cancel();
@@ -218,6 +337,14 @@ class _GameScreenState extends State<GameScreen> {
         playerWidth,
         playerHeight,
       );
+
+      // Check coin collection
+      for (int i = coins.length - 1; i >= 0; i--) {
+        if (playerFinalRect.overlaps(coins[i])) {
+          coins.removeAt(i);
+          score += 10;
+        }
+      }
 
       // Death by falling below screen
       if (playerY > 600) {
@@ -378,6 +505,27 @@ class _GameScreenState extends State<GameScreen> {
                           ),
                         ),
                       ),
+                  
+                  // Render Coins
+                  ...coins
+                      .where((c) {
+                        return c.right >= cameraX - 100 &&
+                            c.left <= cameraX + screenWidth + 100;
+                      })
+                      .map(
+                        (c) => Positioned(
+                          left: c.left - cameraX,
+                          top: c.top,
+                          width: c.width,
+                          height: c.height,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.yellow,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ),
 
                   // Render Goal (only if visible)
                   if (goal.right >= cameraX - 100 &&
@@ -477,6 +625,27 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ),
                 ],
+              ),
+            ),
+            
+            // Score UI
+            Positioned(
+              top: 20,
+              left: 20,
+              child: Text(
+                'SCORE: $score',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black,
+                      offset: Offset(2, 2),
+                      blurRadius: 3,
+                    ),
+                  ],
+                ),
               ),
             ),
 
