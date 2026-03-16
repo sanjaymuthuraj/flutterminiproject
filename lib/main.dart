@@ -283,18 +283,17 @@ class _GameScreenState extends State<GameScreen> {
         },
         child: Stack(
           children: [
-            // Game world container (translations applied for camera)
+            // Game world container
             Positioned.fill(
-              child: Transform.translate(
-                offset: Offset(-cameraX, 0),
-                child: Stack(
-                  children: [
-                    // Render Platforms
-                    ...platforms.where((platform) {
-                       // Only render if platform is within or near the visible viewport
-                       return platform.right >= cameraX - 100 && platform.left <= cameraX + screenWidth + 100;
-                    }).map((platform) => Positioned(
-                      left: platform.left,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Render Platforms
+                  ...platforms.where((platform) {
+                     // Only render if platform is within or near the visible viewport
+                     return platform.right >= cameraX - 100 && platform.left <= cameraX + screenWidth + 100;
+                  }).map((platform) => Positioned(
+                    left: platform.left - cameraX,
                       top: platform.top,
                       width: platform.width,
                       height: platform.height,
@@ -314,7 +313,7 @@ class _GameScreenState extends State<GameScreen> {
                     ...lava.where((l) {
                        return l.right >= cameraX - 100 && l.left <= cameraX + screenWidth + 100;
                     }).map((l) => Positioned(
-                      left: l.left,
+                      left: l.left - cameraX,
                       top: l.top,
                       width: l.width,
                       height: l.height,
@@ -330,7 +329,7 @@ class _GameScreenState extends State<GameScreen> {
                     // Render Goal (only if visible)
                     if (goal.right >= cameraX - 100 && goal.left <= cameraX + screenWidth + 100)
                       Positioned(
-                        left: goal.left,
+                        left: goal.left - cameraX,
                         top: goal.top,
                         width: goal.width,
                         height: goal.height,
@@ -350,7 +349,7 @@ class _GameScreenState extends State<GameScreen> {
                     // Render Castle (only if visible)
                     if (goal.right >= cameraX - 100)
                       Positioned(
-                        left: goal.left + 70,
+                        left: goal.left + 70 - cameraX,
                         top: 150,
                         width: 90,
                         height: 200,
@@ -377,7 +376,7 @@ class _GameScreenState extends State<GameScreen> {
 
                     // Render Player (Mario representation)
                     Positioned(
-                      left: playerX,
+                      left: playerX - cameraX,
                       top: playerY,
                       width: playerWidth,
                       height: playerHeight,
@@ -408,7 +407,6 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ],
                 ),
-              ),
             ),
             
             // On-Screen Controls (Left/Right)
