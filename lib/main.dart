@@ -65,7 +65,7 @@ class _GameScreenState extends State<GameScreen> {
 
     // Elevated platforms
     const Rect.fromLTWH(300, 250, 150, 20),
-    const Rect.fromLTWH(500, 150, 100, 20),
+    const Rect.fromLTWH(500, 170, 120, 20), // Lowered and widened
 
     // Stairs / obstacles
     const Rect.fromLTWH(900, 300, 50, 300),
@@ -73,19 +73,19 @@ class _GameScreenState extends State<GameScreen> {
     const Rect.fromLTWH(1000, 200, 50, 300),
 
     // Large gap and small floating platforms
-    const Rect.fromLTWH(1400, 250, 100, 20),
-    const Rect.fromLTWH(1600, 150, 100, 20),
-    const Rect.fromLTWH(1800, 200, 150, 20),
+    const Rect.fromLTWH(1350, 250, 100, 20),
+    const Rect.fromLTWH(1500, 180, 120, 20), // Lowered and brought closer
+    const Rect.fromLTWH(1700, 200, 150, 20), // Brought closer
 
     // Final high stair climb
-    const Rect.fromLTWH(2400, 300, 50, 300),
-    const Rect.fromLTWH(2450, 250, 50, 300),
-    const Rect.fromLTWH(2500, 200, 50, 300),
-    const Rect.fromLTWH(2550, 150, 50, 300),
-    const Rect.fromLTWH(2600, 100, 50, 300),
+    const Rect.fromLTWH(2400, 310, 50, 300),
+    const Rect.fromLTWH(2450, 270, 50, 300),
+    const Rect.fromLTWH(2500, 230, 50, 300),
+    const Rect.fromLTWH(2550, 190, 50, 300),
+    const Rect.fromLTWH(2600, 150, 50, 300),
 
     // Final high platform before pole
-    const Rect.fromLTWH(2800, 100, 150, 20),
+    const Rect.fromLTWH(2750, 150, 150, 20),
   ];
 
   final Rect goal = const Rect.fromLTWH(3600, 100, 20, 250); // End flag pole
