@@ -25,51 +25,147 @@ class MarioGameApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+enum CharacterType { red, green, purple }
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  CharacterType selectedCharacter = CharacterType.red;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[900],
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'ESCAPE KCET',
-              style: TextStyle(
-                fontSize: 64,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 4,
-                color: Colors.white,
-                shadows: [
-                  Shadow(
-                    color: Colors.black,
-                    offset: Offset(4, 4),
-                    blurRadius: 4,
-                  )
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0D47A1), Color(0xFF1976D2), Color(0xFF64B5F6)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'ESCAPE KCET',
+                style: TextStyle(
+                  fontSize: 72,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 6,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(color: Colors.black54, offset: Offset(4, 6), blurRadius: 8),
+                    Shadow(color: Colors.blueAccent, offset: Offset(-2, -2), blurRadius: 4),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.black45,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'SELECT YOUR CHARACTER',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildCharacterCard(CharacterType.red, Colors.red, Colors.blue[900]!),
+                  const SizedBox(width: 20),
+                  _buildCharacterCard(CharacterType.green, Colors.green, Colors.blue[900]!),
+                  const SizedBox(width: 20),
+                  _buildCharacterCard(CharacterType.purple, Colors.purple, Colors.black),
                 ],
               ),
-            ),
-            const SizedBox(height: 50),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                backgroundColor: Colors.red[600],
-                foregroundColor: Colors.white,
-                elevation: 5,
-                textStyle: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                  backgroundColor: Colors.orangeAccent,
+                  foregroundColor: Colors.black87,
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  textStyle: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: 2),
+                ),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          LoadingScreen(characterType: selectedCharacter),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                    ),
+                  );
+                },
+                child: const Text('START ESCAPE'),
               ),
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoadingScreen()),
-                );
-              },
-              child: const Text('START ESCAPE'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCharacterCard(CharacterType type, Color mainColor, Color hatColor) {
+    bool isSelected = selectedCharacter == type;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedCharacter = type;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: isSelected ? 130 : 100,
+        height: isSelected ? 150 : 120,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white.withOpacity(0.3) : Colors.black26,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.yellowAccent : Colors.transparent,
+            width: 4,
+          ),
+          boxShadow: isSelected
+              ? [const BoxShadow(color: Colors.yellowAccent, blurRadius: 15, spreadRadius: 3)]
+              : [],
+        ),
+        child: Center(
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: mainColor,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.black, width: 3),
             ),
-          ],
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(height: 14, color: hatColor),
+                const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(width: 14, height: 14, color: Colors.blue),
+                    Container(width: 14, height: 14, color: Colors.blue),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -77,7 +173,8 @@ class HomeScreen extends StatelessWidget {
 }
 
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({super.key});
+  final CharacterType characterType;
+  const LoadingScreen({super.key, required this.characterType});
 
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
@@ -91,7 +188,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const GameScreen()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                GameScreen(characterType: widget.characterType),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
         );
       }
     });
@@ -105,13 +208,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
-            CircularProgressIndicator(color: Colors.white),
-            SizedBox(height: 24),
+            CircularProgressIndicator(color: Colors.white, strokeWidth: 6),
+            SizedBox(height: 30),
             Text(
               'Entering Simulation...',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
                 letterSpacing: 2,
               ),
             ),
@@ -123,7 +227,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
 }
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  final CharacterType characterType;
+  const GameScreen({super.key, required this.characterType});
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -411,6 +516,24 @@ class _GameScreenState extends State<GameScreen> {
     // Clamp the camera so it doesn't show past the start of the level
     if (cameraX < 0) cameraX = 0;
 
+    // Determine Colors
+    Color charMainColor;
+    Color charHatColor;
+    switch (widget.characterType) {
+      case CharacterType.red:
+        charMainColor = Colors.red;
+        charHatColor = Colors.blue[900]!;
+        break;
+      case CharacterType.green:
+        charMainColor = Colors.green;
+        charHatColor = Colors.blue[900]!;
+        break;
+      case CharacterType.purple:
+        charMainColor = Colors.purple;
+        charHatColor = Colors.black;
+        break;
+    }
+
     return Scaffold(
       backgroundColor: Colors.lightBlue[300], // Sky color
       body: Focus(
@@ -593,16 +716,16 @@ class _GameScreenState extends State<GameScreen> {
                     height: playerHeight,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.red,
+                        color: charMainColor,
                         borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: Colors.red[900]!, width: 2),
+                        border: Border.all(color: Colors.black, width: 2),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Container(
                             height: 6,
-                            color: Colors.blue[900], // "Hat" or topmost detail
+                            color: charHatColor, // "Hat" or topmost detail
                           ),
                           const Spacer(),
                           Row(
